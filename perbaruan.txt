@@ -1,0 +1,1 @@
+berarti setelah dari ocr langsung masukkan ke chroma db, lalu setelah dimasukkan ke chromadb,  user memasukkan prompt dan dari prompt tersebut dicocokkan dengan vector yang ada di chromadb, lalu diberikan ke pada llm

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Page</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+
+  <body>
+    <div class="container mt-5">
+      <h2 class="mb-4">Admin Panel</h2>
+
+      <!-- PDF File Upload -->
+      <form
+        action="{{ url_for('admin_upload') }}"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <div class="form-group">
+          <label for="file">Upload PDF</label>
+          <input type="file" name="file" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Upload PDF</button>
+      </form>
+
+      <hr />
+
+      <h3>Manage Uploaded PDFs</h3>
+      <ul class="list-group">
+        {% for file in pdf_files %}
+        <li class="list-group-item">
+          {{ file }}
+          <form
+            action="{{ url_for('admin_delete', filename=file) }}"
+            method="post"
+            style="display: inline"
+          >
+            <button type="submit" class="btn btn-danger btn-sm ml-2">
+              Delete
+            </button>
+          </form>
+          <form
+            action="{{ url_for('admin_update', filename=file) }}"
+            method="post"
+            enctype="multipart/form-data"
+            style="display: inline"
+          >
+            <input
+              type="file"
+              name="file"
+              required
+              class="btn btn-warning btn-sm ml-2"
+            />
+            <button type="submit" class="btn btn-warning btn-sm ml-2">
+              Update
+            </button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </body>
+</html>
