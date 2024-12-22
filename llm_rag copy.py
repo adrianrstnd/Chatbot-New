@@ -12,30 +12,23 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate
 from groq import Groq
 import torch
-import chromadb
-from langchain_core.documents import Document
-from uuid import uuid4
 
 load_dotenv()  # Load environment variables from .env file
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+HF_TOKEN = os.getenv("HUGGING_FACE_API_KEY")
+DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 
 class LLMRAGProcessor:
     def __init__(self):
-        self.llm = ChatGroq(groq_api_key= GROQ_API_KEY, model_name="Llama-3.1-70b-Versatile")
-        self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-        self.client = chromadb.PersistentClient(path='chroma_db')
-        self.db_vector = Chroma(client=self.client, collection_name='TESTING', embedding_function=self.embeddings)
-        # Setup retrieval chain for querying
-        self.conversation_retrieval_chain = RetrievalQA.from_chain_type(
-            llm=self.llm,
-            chain_type='stuff',
-            retriever=self.db_vector.as_retriever(search_type='mmr', search_kwargs={'k': 3, 'lambda_mult': 0.25}),
-            return_source_documents=True,
-            input_key='input'
-            )
+        self.llm = ChatGroq(groq_api_key='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', model_name="Llama-3.1-70b-Versatile")
+        self.embeddings = HuggingFaceEmbeddings(model_name="thenlper/gte-small")
+        self.db_vector = None
+        self.conversation_retrieval_chain = None
+
         # Initialize specific models for summarizing different elements
+        self.model_llama_table = ChatGroq(groq_api_key='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', model_name='llama-3.3-70b-versatile')
         self.conversation_template = ChatPromptTemplate.from_messages(
             [
                 (
@@ -104,7 +97,8 @@ class LLMRAGProcessor:
     # Function to delete Chroma DB
     def delete_chromadb(self):
         try:
-            pass
+            self.db_vector.delete_collection()
+            print("Deleting previous Chroma DB")
         except:
             pass
 
@@ -137,14 +131,22 @@ class LLMRAGProcessor:
                 chunk_overlap=80
             )
             chunks = text_splitter.split_text(combined_text)
-            documents = [Document(page_content=chunk, metadata={'source': document_path}) for chunk in chunks]
             print('text splitter selesai')
 
             # Delete and create a new Chroma DB
-            #self.delete_chromadb()
+            self.delete_chromadb()
             print("Creating a new Chroma DB")
-            self.db_vector.add_documents(documents= documents, ids=[str(uuid4()) for _ in range(len(chunks))])
+            self.db_vector = Chroma.from_texts(chunks, embedding=self.embeddings)
             print("Successfully created a new Chroma DB")
+
+            # Setup retrieval chain for querying
+            self.conversation_retrieval_chain = RetrievalQA.from_chain_type(
+                llm=self.llm,
+                chain_type='stuff',
+                retriever=self.db_vector.as_retriever(search_type='mmr', search_kwargs={'k': 8, 'lambda_mult': 0.25}),
+                return_source_documents=True,
+                input_key='pertanyaan'
+            )
 
             return True
 
@@ -154,17 +156,10 @@ class LLMRAGProcessor:
         
     def process_prompt(self, prompt, user_uuid):
         formatted_prompt = self.conversation_template.format(input=prompt)
-        print('prompt telah diformat')
         chat_history = self.retrieve_chat_history(user_uuid, 8)
-        print('chat history berhasil di dapatkan')
 
         # Use the retrieval chain to get the answer
-        print(formatted_prompt)
-        print(chat_history)
-        print(self.conversation_retrieval_chain)
-        
-        output = self.conversation_retrieval_chain({'input': formatted_prompt, 'chat_history': chat_history})
-        print('test prompt')
+        output = self.conversation_retrieval_chain({'pertanyaan': formatted_prompt, 'chat_history': chat_history})
         answer = output['result']
         source_documents = output['source_documents']
 

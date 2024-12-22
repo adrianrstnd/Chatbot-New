@@ -29,8 +29,9 @@ def assign_user_id():
         print(session['user_id'])
 
 @app.route('/')
-def index_user():
-    return render_template('index_user.html')  # For user interaction
+def index():
+    return render_template('index.html')
+
 @app.route('/process-message', methods=['POST'])
 def process_prompt_route():
     user_prompt = request.json.get('userMessage')
@@ -41,17 +42,13 @@ def process_prompt_route():
 
     print('user message:', user_prompt)
 
+    # need to be change if wanting to use msds only
     # Pass the user_id to the processor to handle user-specific data
-    print('mencoba memproses prompt')
     response, msds_source_documents = processor.process_prompt(user_prompt, user_id)
 
     print('source document:', msds_source_documents)
 
     return jsonify({'botResponse': response}), 200
-
-@app.route('/admin')
-def index_admin():
-    return render_template('index_admin.html')  # For admin to upload documents
 
 @app.route('/process-document', methods=['POST'])
 def process_document_route():
@@ -71,6 +68,14 @@ def process_document_route():
         existing_file_path = os.path.join(user_dir_pdf, existing_file)
         os.remove(existing_file_path)
 
+    user_dir_txt = os.path.join("user_txt", user_id)
+
+    # Remove any existing txt files in the each user dir
+    if os.path.exists(user_dir_txt):
+        for existing_txt in os.listdir(user_dir_txt):
+            existing_txt_path = os.path.join(user_dir_txt, existing_txt)
+            os.remove(existing_txt_path)
+
     # Save the new file
     msds_doc_path = os.path.join(user_dir_pdf, file.filename)
     file.save(msds_doc_path)
@@ -79,7 +84,7 @@ def process_document_route():
     is_process_ok = processor.process_uploaded_document(msds_doc_path, user_id)
 
     if is_process_ok:
-        return jsonify({'botResponse': 'Terima kasih telah mengirimkan PDF, saya telah menganalisis dokumen nya, silahkan bertanya apapun terkait dengan dokumen tersebut'}), 200
+        return jsonify({'botResponse': 'Terima kasih telah mengirimkan PDF, saya telah menganalisis dokumen  nya, silahkan bertanya apapun terkait dengan dokumen tersebut'}), 200
     else:
         os.remove(msds_doc_path)
         return jsonify({'botResponse': 'Maaf, saya tidak bisa memproses dokumen ini'}), 400
@@ -87,6 +92,7 @@ def process_document_route():
 @app.teardown_appcontext
 def close_db_connection(Exception=None):
     processor.close_connection()
+    
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
