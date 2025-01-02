@@ -55,34 +55,60 @@ def index_admin():
 
 @app.route('/process-document', methods=['POST'])
 def process_document_route():
-    user_id = session['user_id']
-
     if 'file' not in request.files:
         return jsonify({'botResponse': 'Tolong upload file PDF'}), 400
 
     file = request.files['file']
 
-    # Store file in a user-specific directory
-    user_dir_pdf = os.path.join("user_pdf", user_id)
-    os.makedirs(user_dir_pdf, exist_ok=True)
+    # Simpan file langsung di folder 'user_pdf'
+    user_pdf_dir = "user_pdf"
 
-    # Remove any existing files in the user's directory
-    for existing_file in os.listdir(user_dir_pdf):
-        existing_file_path = os.path.join(user_dir_pdf, existing_file)
-        os.remove(existing_file_path)
+    # Buat folder 'user_pdf' jika belum ada
+    os.makedirs(user_pdf_dir, exist_ok=True)
 
-    # Save the new file
-    msds_doc_path = os.path.join(user_dir_pdf, file.filename)
+    # Simpan file yang diupload langsung dengan nama file aslinya
+    msds_doc_path = os.path.join(user_pdf_dir, file.filename)
     file.save(msds_doc_path)
 
-    # Process the uploaded document for the specific user
-    is_process_ok = processor.process_uploaded_document(msds_doc_path, user_id)
+    # Proses dokumen yang diupload
+    is_process_ok = processor.process_uploaded_document(msds_doc_path)
 
     if is_process_ok:
         return jsonify({'botResponse': 'Terima kasih telah mengirimkan PDF, saya telah menganalisis dokumen nya, silahkan bertanya apapun terkait dengan dokumen tersebut'}), 200
     else:
         os.remove(msds_doc_path)
         return jsonify({'botResponse': 'Maaf, saya tidak bisa memproses dokumen ini'}), 400
+
+@app.route('/delete-document', methods=['POST'])
+def delete_document_route():
+    # Mendapatkan nama dokumen dari request JSON
+    document_name = request.json.get('documentName')
+
+    if not document_name:
+        return jsonify({'error': 'Tolong masukkan nama file PDF yang ingin dihapus.'}), 400
+
+    try:
+        # Path ke folder user_pdf tempat dokumen disimpan
+        user_pdf_path = 'user_pdf'
+        document_path = os.path.join(user_pdf_path, document_name)
+
+        # Cek apakah file ada, jika ada maka hapus file tersebut
+        if os.path.exists(document_path):
+            os.remove(document_path)
+            print(f"Dokumen {document_name} berhasil dihapus dari folder user_pdf.")
+        else:
+            return jsonify({'error': f'Dokumen {document_name} tidak ditemukan di folder user_pdf.'}), 400
+
+        # Hapus dokumen dari Chroma DB menggunakan metadata 'source'
+        result = processor.delete_document(document_name)
+        if result:
+            return jsonify({'botResponse': f'Dokumen {document_name} telah dihapus dari folder dan Chroma DB.'}), 200
+        else:
+            return jsonify({'error': f'Gagal menghapus dokumen {document_name} dari Chroma DB.'}), 400
+
+    except Exception as e:
+        print(f"Error deleting document: {e}")
+        return jsonify({'error': 'Terjadi kesalahan saat menghapus dokumen.'}), 500
     
 @app.teardown_appcontext
 def close_db_connection(Exception=None):

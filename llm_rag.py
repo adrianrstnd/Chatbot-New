@@ -24,7 +24,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 class LLMRAGProcessor:
     def __init__(self):
         self.llm = ChatGroq(groq_api_key= GROQ_API_KEY, model_name="Llama-3.1-70b-Versatile")
-        self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        self.embeddings = HuggingFaceEmbeddings(model_name="avsolatorio/GIST-small-Embedding-v0")
         self.client = chromadb.PersistentClient(path='chroma_db')
         self.db_vector = Chroma(client=self.client, collection_name='TESTING', embedding_function=self.embeddings)
         # Setup retrieval chain for querying
@@ -100,57 +100,71 @@ class LLMRAGProcessor:
 
         return formatted_history
 
-
-    # Function to delete Chroma DB
-    def delete_chromadb(self):
+     # Method to delete document from Chroma DB and user_pdf folder
+    def delete_document(self, document_name):
         try:
-            pass
-        except:
-            pass
+            # Path ke folder user_pdf tempat dokumen disimpan
+            user_pdf_path = 'user_pdf'
+            document_path = os.path.join(user_pdf_path, document_name)
 
+            # Cek apakah file ada di folder user_pdf
+            if os.path.exists(document_path):
+                os.remove(document_path)
+                print(f"Dokumen {document_name} berhasil dihapus dari folder user_pdf.")
+            else:
+                print(f"Dokumen {document_name} tidak ditemukan di folder user_pdf.")
 
+            # Menghapus dokumen berdasarkan metadata 'source' dari Chroma DB
+            deletion_result = self.db_vector.delete(where={"source": document_path})
+
+            if deletion_result:
+                print(f"Dokumen {document_name} berhasil dihapus dari Chroma DB.")
+            else:
+                print(f"Dokumen {document_name} tidak ditemukan di Chroma DB.")
+
+            return True  # Dokument berhasil dihapus dari kedua tempat
+
+        except Exception as e:
+            print(f"Error deleting document: {e}")
+            return False  # Terjadi kesalahan saat penghapusan
 
     # Process and summarize uploaded document
-    def process_uploaded_document(self, document_path, user_uuid):
+    def process_uploaded_document(self, document_path):
         try:
             print('unstructured dimulai')
+
+            # Proses dokumen menggunakan unstructured
             elements = partition_pdf(
-                filename=document_path,
-                strategy='hi_res',
-                infer_table_structure=True,
-                hi_res_model_name="yolox"
+            filename=document_path,
+            strategy='hi_res',
+            infer_table_structure=True,
+            hi_res_model_name="yolox"
             )
 
-            combined_element = []
+            # Gabungkan teks dari elemen yang tidak kosong
+            combined_text = "\n".join([element.text for element in elements if element.text])
+            print('element selesai')
 
-            for element in elements:
-                combined_element.append(element.text)
-                print('element selesai')
-
-            # Join only non-empty strings
-            combined_text = "\n".join(filter(None, combined_element))
-
-
-            # Split the combined text into chunks for vector storage
+            # Split teks menjadi chunk untuk penyimpanan vektor
             text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=800,
-                chunk_overlap=80
+            chunk_size=800,
+            chunk_overlap=80
             )
             chunks = text_splitter.split_text(combined_text)
             documents = [Document(page_content=chunk, metadata={'source': document_path}) for chunk in chunks]
             print('text splitter selesai')
 
-            # Delete and create a new Chroma DB
-            #self.delete_chromadb()
-            print("Creating a new Chroma DB")
-            self.db_vector.add_documents(documents= documents, ids=[str(uuid4()) for _ in range(len(chunks))])
-            print("Successfully created a new Chroma DB")
+            # Tambahkan dokumen ke Chroma DB
+            print("Menambahkan dokumen ke Chroma DB")
+            self.db_vector.add_documents(documents=documents)
+            print("Dokumen berhasil ditambahkan ke Chroma DB")
 
             return True
 
         except Exception as e:
             print(f"Error processing document: {e}")
             return False
+
         
     def process_prompt(self, prompt, user_uuid):
         formatted_prompt = self.conversation_template.format(input=prompt)
