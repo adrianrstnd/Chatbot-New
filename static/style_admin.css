@@ -1,0 +1,85 @@
+body {
+  background-color: #e5ddd5; /* Warna latar belakang halaman yang lembut */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+h2 {
+  font-size: 20px;
+  margin-top: 20px;
+  color: #007bff;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+input[type="file"],
+input[type="text"] {
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+input[type="file"]:focus,
+input[type="text"]:focus {
+  border-color: #007bff;
+}
+
+button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+#upload-status,
+#delete-status {
+  text-align: center;
+  color: #555;
+  font-size: 14px;
+}
+
+#upload-btn,
+#delete-btn {
+  width: 100%;
+}
+
+input[type="file"] {
+  max-width: 95%;
+}
+
+input[type="text"] {
+  max-width: 95%;
+}
+
+.admin-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}

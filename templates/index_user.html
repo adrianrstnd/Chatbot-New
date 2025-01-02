@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Interaction</title>
-    <link rel="stylesheet" href="static\style.css">
-    <script src="static\script_4.js" defer></script>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat with Bot</title>
+    <link rel="stylesheet" href="static/style.css" />
+    <script src="static/script_user.js" defer></script>
+  </head>
+  <body>
     <div class="container">
-        <h1>Chat with Bot</h1>
-        <div id="chat-window">
-            <div id="chat-log"></div>
+      <h1>Chat with Bot</h1>
+      <div id="chat-window">
+        <div id="chat-log"></div>
+        <div id="loading" class="hidden">
+          Bot is typing<span class="dots">...</span>
         </div>
-        <div id="input-area">
-            <input type="text" id="user-prompt" placeholder="Type your prompt here...">
-            <button id="send-prompt">Send</button>
-        </div>
+      </div>
+      <div id="input-area">
+        <input
+          type="text"
+          id="user-prompt"
+          placeholder="Type your prompt here..."
+        />
+        <button id="send-prompt">
+          <img src="static/send-icon.jpg" alt="Send" />
+        </button>
+      </div>
     </div>
-</body>
+  </body>
 </html>

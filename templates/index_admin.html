@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel</title>
-    <link rel="stylesheet" href="static\style.css">
-    <script src="static\script_4 copy.js" defer></script>
-</head>
-<body>
-    <div class="container">
-        <h1>Upload Document</h1>
+    <link rel="stylesheet" href="static/style_admin.css" />
+    <script src="static/script_admin.js" defer></script>
+  </head>
+  <body>
+    <div class="admin-container">
+      <h1>Admin Panel</h1>
+
+      <div class="form-section">
+        <h2>Upload Document</h2>
         <form id="upload-form" enctype="multipart/form-data">
-            <input type="file" id="file-upload" name="file" accept="application/pdf">
-            <button type="submit">Upload</button>
+          <input
+            type="file"
+            id="file-upload"
+            name="file"
+            accept="application/pdf"
+          />
+          <button type="submit">Upload</button>
         </form>
         <div id="upload-status"></div>
+      </div>
+
+      <div class="form-section">
+        <h2>Delete Document</h2>
+        <form id="delete-form">
+          <input
+            type="text"
+            id="file-delete"
+            name="fileName"
+            placeholder="Enter document name"
+          />
+          <button type="submit">Delete</button>
+        </form>
+        <div id="delete-status"></div>
+      </div>
     </div>
-</body>
+  </body>
 </html>
