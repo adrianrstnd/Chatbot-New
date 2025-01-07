@@ -110,6 +110,65 @@ def delete_document_route():
         print(f"Error deleting document: {e}")
         return jsonify({'error': 'Terjadi kesalahan saat menghapus dokumen.'}), 500
     
+@app.route('/view-history')
+def view_history():
+    return render_template('index_history.html')
+
+@app.route('/history', methods=['GET'])
+def get_paginated_chat_history():
+    try:
+        # Ambil parameter dari query string
+        month = request.args.get('month')  # Format: MM
+        year = request.args.get('year')    # Format: YYYY
+        page = request.args.get('page', 1, type=int)  # Halaman saat ini
+        limit = 50  # Data per halaman
+        offset = (page - 1) * limit
+
+        # # Validasi: jika salah satu kosong, kembalikan respons kosong
+        # if not month or not year:
+        #     return jsonify({'history': []}), 200  # Data kosong jika filter tidak lengkap
+        
+        # Query dasar
+        base_query = """
+            SELECT user_message, bot_response, timestamp 
+            FROM conversation_history
+        """
+        filters = []
+        params = []
+
+        # Tambahkan filter hanya jika bulan dan tahun tersedia
+        # if month and year:
+        #     filters.append("MONTH(timestamp) = %s AND YEAR(timestamp) = %s")
+        #     params.extend([month, year])
+
+        # Kondisi berdasarkan kombinasi filter
+        if month and month.lower() != "all":
+            filters.append("MONTH(timestamp) = %s")
+            params.append(month)
+
+        if year:
+            filters.append("YEAR(timestamp) = %s")
+            params.append(year)
+
+        # Tambahkan filter jika ada
+        if filters:
+            base_query += " WHERE " + " AND ".join(filters)
+
+        # Sorting secara ascending dan pagination
+        base_query += " ORDER BY timestamp ASC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+
+        with processor.connect_to_database() as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(base_query, tuple(params))
+                history = cursor.fetchall()
+
+        # Response dengan data riwayat chatbot
+        return jsonify({'history': history}), 200
+    except Exception as e:
+        print(f"Error retrieving chat history: {e}")
+        return jsonify({'error': 'Gagal mengambil data riwayat chatbot.'}), 500
+    
 @app.teardown_appcontext
 def close_db_connection(Exception=None):
     processor.close_connection()

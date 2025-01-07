@@ -24,7 +24,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 class LLMRAGProcessor:
     def __init__(self):
         self.llm = ChatGroq(groq_api_key= GROQ_API_KEY, model_name="Llama-3.1-70b-Versatile")
-        self.embeddings = HuggingFaceEmbeddings(model_name="avsolatorio/GIST-small-Embedding-v0")
+        self.embeddings = HuggingFaceEmbeddings(model_name="avsolatorio/GIST-Embedding-v0")
         self.client = chromadb.PersistentClient(path='chroma_db')
         self.db_vector = Chroma(client=self.client, collection_name='TESTING', embedding_function=self.embeddings)
         # Setup retrieval chain for querying
