@@ -30,6 +30,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background-color: white;
 }
 
 #chat-log {
@@ -120,4 +121,17 @@ h1 {
 #send-prompt img {
   width: 24px;
   height: 24px;
+}
+
+/* Styling untuk logo */
+#logo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000; /* Pastikan logo tampil di atas elemen lain */
+}
+
+#logo img {
+  width: 50px; /* Sesuaikan ukuran logo */
+  height: auto;
 }

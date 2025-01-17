@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const { user_message, bot_response, timestamp } = entry;
             return `
               <tr>
-                <td>${(page - 1) * 50 + index + 1}</td>
+                <td>${(page - 1) * 10 + index + 1}</td>
                 <td>${user_message}</td>
                 <td>${bot_response}</td>
                 <td>${new Date(timestamp).toLocaleString()}</td>
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           tableBody.innerHTML = rows.join(""); // Render rows
-          updatePaginationButtons(page, month, year, data.history.length < 50); // Update pagination
+          updatePaginationButtons(page, month, year, data.history.length < 10); // Update pagination
         } else {
           tableBody.innerHTML =
             '<tr><td colspan="4">No chat history available for the selected filters.</td></tr>';

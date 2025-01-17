@@ -64,7 +64,7 @@ button:hover {
 
 #upload-btn,
 #delete-btn {
-  width: 100%;
+  width: 98%;
 }
 
 input[type="file"] {
@@ -82,4 +82,44 @@ input[type="text"] {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  border: 3px solid #f3f3f3; /* Light gray */
+  border-top: 3px solid #007bff; /* Blue */
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.document-list-section {
+  margin-top: 20px;
+}
+
+.document-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.document-list li {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
 }

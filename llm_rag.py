@@ -31,7 +31,7 @@ class LLMRAGProcessor:
         self.conversation_retrieval_chain = RetrievalQA.from_chain_type(
             llm=self.llm,
             chain_type='stuff',
-            retriever=self.db_vector.as_retriever(search_type='mmr', search_kwargs={'k': 3, 'lambda_mult': 0.25}),
+            retriever=self.db_vector.as_retriever(search_type='mmr', search_kwargs={'k': 5, 'lambda_mult': 0.25}),
             return_source_documents=True,
             input_key='input'
             )

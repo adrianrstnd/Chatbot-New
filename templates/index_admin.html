@@ -11,6 +11,7 @@
     <div class="admin-container">
       <h1>Admin Panel</h1>
 
+      <!-- Upload Section -->
       <div class="form-section">
         <h2>Upload Document</h2>
         <form id="upload-form" enctype="multipart/form-data">
@@ -20,11 +21,15 @@
             name="file"
             accept="application/pdf"
           />
-          <button type="submit">Upload</button>
+          <button type="submit" id="upload-btn">
+            <span id="upload-spinner" class="spinner hidden"></span>
+            Upload
+          </button>
         </form>
-        <div id="upload-status"></div>
+        <div id="upload-status" class="status-message"></div>
       </div>
 
+      <!-- Delete Section -->
       <div class="form-section">
         <h2>Delete Document</h2>
         <form id="delete-form">
@@ -34,9 +39,20 @@
             name="fileName"
             placeholder="Enter document name"
           />
-          <button type="submit">Delete</button>
+          <button type="submit" id="delete-btn">
+            <span id="delete-spinner" class="spinner hidden"></span>
+            Delete
+          </button>
         </form>
-        <div id="delete-status"></div>
+        <div id="delete-status" class="status-message"></div>
+      </div>
+
+      <!-- Document List Section -->
+      <div class="document-list-section">
+        <h2>Document List</h2>
+        <ul id="document-list" class="document-list">
+          <!-- Document names will be dynamically inserted here -->
+        </ul>
       </div>
     </div>
   </body>

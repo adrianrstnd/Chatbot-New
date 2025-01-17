@@ -35,3 +35,12 @@ document.getElementById("send-prompt").addEventListener("click", async () => {
 
   promptInput.value = "";
 });
+
+// Menangani pengiriman pesan dengan tombol Enter
+document.getElementById("user-prompt").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    // Mencegah enter menghasilkan baris baru di input
+    e.preventDefault();
+    document.getElementById("send-prompt").click();
+  }
+});

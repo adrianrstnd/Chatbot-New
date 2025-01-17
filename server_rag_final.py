@@ -102,13 +102,27 @@ def delete_document_route():
         # Hapus dokumen dari Chroma DB menggunakan metadata 'source'
         result = processor.delete_document(document_name)
         if result:
-            return jsonify({'botResponse': f'Dokumen {document_name} telah dihapus dari folder dan Chroma DB.'}), 200
+            return jsonify({'botResponse': f'Dokumen {document_name} telah dihapus dari folder.'}), 200
         else:
             return jsonify({'error': f'Gagal menghapus dokumen {document_name} dari Chroma DB.'}), 400
 
     except Exception as e:
         print(f"Error deleting document: {e}")
         return jsonify({'error': 'Terjadi kesalahan saat menghapus dokumen.'}), 500
+    
+@app.route('/list-documents', methods=['GET'])
+def list_documents():
+    try:
+        user_pdf_dir = 'user_pdf'
+        if not os.path.exists(user_pdf_dir):
+            return jsonify({'documents': []}), 200  # Return empty if folder doesn't exist
+
+        # Get list of files in the folder
+        documents = [f for f in os.listdir(user_pdf_dir) if f.endswith('.pdf')]
+        return jsonify({'documents': documents}), 200
+    except Exception as e:
+        print(f"Error listing documents: {e}")
+        return jsonify({'error': 'Gagal mengambil daftar dokumen.'}), 500
     
 @app.route('/view-history')
 def view_history():
@@ -121,7 +135,7 @@ def get_paginated_chat_history():
         month = request.args.get('month')  # Format: MM
         year = request.args.get('year')    # Format: YYYY
         page = request.args.get('page', 1, type=int)  # Halaman saat ini
-        limit = 50  # Data per halaman
+        limit = 10  # Data per halaman
         offset = (page - 1) * limit
 
         # # Validasi: jika salah satu kosong, kembalikan respons kosong
